@@ -1,6 +1,6 @@
-# TTS Piper Argentina con Cache
+# TTS Piper con Cache
 
-Este proyecto es un **servicio de Text-to-Speech (TTS)** basado en [Piper](https://github.com/rhasspy/piper) que convierte texto en audio WAV en español de Argentina.
+Este proyecto es un **servicio de Text-to-Speech (TTS)** basado en [Piper](https://github.com/rhasspy/piper) que convierte texto en audio.
 Incluye **caché local**, de modo que si un texto ya fue convertido, devuelve el archivo existente en lugar de generar uno nuevo.
 
 ---
