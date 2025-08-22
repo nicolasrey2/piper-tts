@@ -6,6 +6,6 @@ services:
       - TTS_PORT=8000
     ports:
       - 8000:8000
-    # volumes:
-    #   - ./outputs:/outputs  # Para guardar los audios generados en local
+    volumes:
+      - /outputs:/outputs  # Para guardar los audios generados en local
     restart: unless-stopped

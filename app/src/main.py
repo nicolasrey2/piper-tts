@@ -5,7 +5,6 @@ import time
 import logging
 import uvicorn
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 # Configuración Piper
@@ -60,9 +59,5 @@ def tts(request: TextoRequest):
         raise HTTPException(status_code=400, detail="El texto no puede estar vacío")
 
     archivo_audio = texto_a_audio(request.texto)
-    return FileResponse(archivo_audio, media_type="audio/wav", filename="audio.wav")
-
-
-if __name__ == "__main__":
-    puerto = int(os.getenv("TTS_PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=puerto)
+    # devolver solo el nombre del archivo (no el binario)
+    return {"archivo": os.path.basename(archivo_audio)}
