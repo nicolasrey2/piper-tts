@@ -7,6 +7,14 @@ ENV PIP_NO_CACHE_DIR=1
 # Puerto por defecto
 ENV TTS_PORT=8000
 
+
+# Instalo sox
+RUN apt-get update && apt-get install -y \
+    sox \
+    libsox-fmt-all \
+    && rm -rf /var/lib/apt/lists/*
+
+
 # Carpeta de trabajo
 WORKDIR /app
 
