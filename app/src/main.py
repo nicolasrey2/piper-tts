@@ -3,6 +3,8 @@ import os
 import subprocess
 import time
 import logging
+import tempfile
+import shutil
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -39,18 +41,25 @@ def texto_a_audio(texto: str) -> str:
 
     logging.info(f"[GENERANDO] {archivo_salida}")
     try:
+        # Generar audio con Piper
         subprocess.run(
             ["python3", "-m", "piper", "-m", VOZ, "--length-scale", LENGTH_SCALE, "-f", archivo_salida],
             input=texto.encode("utf-8"),
             check=True
         )
 
-        # Convertir en el mismo archivo (pisando con formato compatible con Asterisk)
+        # Convertir a 8kHz, mono, 16-bit PCM usando archivo temporal
+        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+            tmp_name = tmp.name
+
         subprocess.run(
-            ["sox", archivo_salida, "-r", "8000", "-c", "1", "-b", "16", archivo_salida],
+            ["sox", archivo_salida, "-r", "8000", "-c", "1", "-b", "16", tmp_name],
             check=True
         )
-        
+
+        # Reemplazar el archivo original
+        shutil.move(tmp_name, archivo_salida)
+
     except subprocess.CalledProcessError as e:
         logging.error(f"Error generando audio: {e}")
         raise RuntimeError(f"Error generando audio: {e}")
