@@ -37,6 +37,10 @@ def texto_a_audio(texto: str) -> str:
     if os.path.exists(archivo_salida):
         elapsed = time.time() - start_time
         logging.info(f"[CACHE] Encontrado: {archivo_salida} (tiempo: {elapsed:.3f}s)")
+
+        # ── ACTUALIZAR TIMESTAMP ──
+        os.utime(archivo_salida, None)  # None usa la hora actual para atime y mtime
+        logging.info(f"[CACHE] Timestamp actualizado con touch: {archivo_salida}")
         return archivo_salida
 
     logging.info(f"[GENERANDO] {archivo_salida}")
