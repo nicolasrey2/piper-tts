@@ -8,6 +8,11 @@ ENV PIP_NO_CACHE_DIR=1
 ENV TTS_PORT=8000
 
 
+# configuramos zona horaria
+ENV TZ=America/Argentina/Buenos_Aires
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
+
 # Instalo sox
 RUN apt-get update && apt-get install -y \
     sox \
