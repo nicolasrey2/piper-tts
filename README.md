@@ -19,10 +19,17 @@ Incluye **caché local**, de modo que si un texto ya fue convertido, devuelve el
 
 ```
 .
-├── app/
+├── app
 │   ├── requirements.txt
-│   └── src/
-│       └── main.py
+│   ├── src
+│   │   ├── audio_concatenator.py
+│   │   ├── main.py
+│   │   ├── text_to_speech.py
+│   │   └── tts_service.py
+│   └── tests
+│       ├── test_audio_concatenator.py
+│       ├── test_text_to_speech.py
+│       └── test_tts_service.py
 ├── docker-compose.yml
 ├── Dockerfile
 ├── README.md
