@@ -1,7 +1,7 @@
 # TTS Piper con Cache
 
 Este proyecto es un **servicio de Text-to-Speech (TTS)** basado en [Piper](https://github.com/rhasspy/piper) que convierte texto en audio.
-Incluye **caché local**, de modo que si un texto ya fue convertido, devuelve el archivo existente en lugar de generar uno nuevo.
+Incluye **caché local**, de modo que si un texto ya fue convertido, devuelve el archivo existente en lugar de generar uno nuevo. Y tolera recibir textos con placeholders.
 
 ---
 
@@ -38,7 +38,7 @@ Incluye **caché local**, de modo que si un texto ya fue convertido, devuelve el
 1. **Construir y levantar el contenedor:**
 
 ```bash
-docker-compose up --build
+docker compose up --build
 ```
 
 2. El servicio TTS quedará expuesto en el puerto `8000` por defecto.
@@ -71,17 +71,24 @@ Asegurate de que los nombres de archivo coincidan con los definidos en `main.py`
 **URL:** `POST /tts`
 **Contenido:** `application/json`
 
-### Body de ejemplo
+### Body's de ejemplo
 
 ```json
 {
-  "texto": "Hola, este es un ejemplo de TTS con Piper"
+  "texto": "Hola, este es un ejemplo de TTS con Piper",
+  "placeholders": ""
+}
+```
+```json
+{
+  "texto": "Hola mi nombre es {nombre} y tengo {edad} años",
+  "placeholders": ["nicolas", "20"]
 }
 ```
 
 ### Respuesta
 
-* Archivo WAV generado o recuperado de la caché.
+* Archivo WAV generado o concatenado o recuperado de la caché.
 * Nombre del archivo: `audio.wav`
 * `Content-Type: audio/wav`
 
@@ -90,7 +97,7 @@ Asegurate de que los nombres de archivo coincidan con los definidos en `main.py`
 ```bash
 curl -X POST "http://localhost:8000/tts" \
      -H "Content-Type: application/json" \
-     -d '{"texto": "Hola, este es un test"}' \
+     -d '{ "texto": "Hola, este es un test", "placeholders": ""}' \
      --output audio.wav
 ```
 

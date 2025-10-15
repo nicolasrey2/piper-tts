@@ -1,18 +1,14 @@
-import hashlib
 import os
-import subprocess
-import time
 import logging
-import tempfile
-import shutil
-import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import tts_service
 
 # Configuración Piper
 VOZ = "/voces/es_AR-daniela-high.onnx"
 SALIDA_DIR = "/outputs"
-LENGTH_SCALE = "1.45"  # velocidad de reproduccion de la voz
+LENGTH_SCALE = "1.45"           # velocidad de reproduccion de la voz
+MILISECONDS_INTER_CONCAT = 500  # 500 milisegundos cuando se concatenan audios
 
 os.makedirs(SALIDA_DIR, exist_ok=True)
 
@@ -22,62 +18,19 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
 )
 
-app = FastAPI(title="TTS Piper Argentina con Cache")
+app = FastAPI(title="TTS Piper con Cache")
 
-# Modelo de entrada
 class TextoRequest(BaseModel):
     texto: str
+    placeholders: list[str]
 
-def texto_a_audio(texto: str) -> str:
-    """Genera o devuelve el audio de un texto usando cache"""
-    start_time = time.time()
-    hash_texto = hashlib.md5(texto.encode("utf-8")).hexdigest()
-    archivo_salida = os.path.join(SALIDA_DIR, f"{hash_texto}.wav")
-
-    if os.path.exists(archivo_salida):
-        elapsed = time.time() - start_time
-        logging.info(f"[CACHE] Encontrado: {archivo_salida} (tiempo: {elapsed:.3f}s)")
-
-        # ── ACTUALIZAR TIMESTAMP ──
-        os.utime(archivo_salida, None)  # None usa la hora actual para atime y mtime
-        logging.info(f"[CACHE] Timestamp actualizado con touch: {archivo_salida}")
-        return archivo_salida
-
-    logging.info(f"[GENERANDO] {archivo_salida}")
-    try:
-        # Generar audio con Piper
-        subprocess.run(
-            ["python3", "-m", "piper", "-m", VOZ, "--length-scale", LENGTH_SCALE, "-f", archivo_salida],
-            input=texto.encode("utf-8"),
-            check=True
-        )
-
-        # Convertir a 8kHz, mono, 16-bit PCM usando archivo temporal
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-            tmp_name = tmp.name
-
-        subprocess.run(
-            ["sox", archivo_salida, "-r", "8000", "-c", "1", "-b", "16", tmp_name],
-            check=True
-        )
-
-        # Reemplazar el archivo original
-        shutil.move(tmp_name, archivo_salida)
-
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Error generando audio: {e}")
-        raise RuntimeError(f"Error generando audio: {e}")
-
-    elapsed = time.time() - start_time
-    logging.info(f"[GENERADO] {archivo_salida} (tiempo: {elapsed:.3f}s)")
-    return archivo_salida
-
-# Endpoint
 @app.post("/tts")
 def tts(request: TextoRequest):
     if not request.texto.strip():
         raise HTTPException(status_code=400, detail="El texto no puede estar vacío")
 
-    archivo_audio = texto_a_audio(request.texto)
+    archivo_audio = tts_service.process(text=request.texto, placeholders=request.placeholders,
+                            length_scale=LENGTH_SCALE, salida_dir=SALIDA_DIR, voz=VOZ,
+                            mlsec_inter_concatenate=MILISECONDS_INTER_CONCAT)
     # devolver solo el nombre del archivo (no el binario)
     return {"archivo": os.path.basename(archivo_audio)}

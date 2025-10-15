@@ -39,5 +39,8 @@ COPY voces/ /voces/
 # Exponemos puerto
 EXPOSE ${TTS_PORT}
 
+ENV PYTHONPATH=/app/src
+
+
 # Comando por defecto
-CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port $TTS_PORT"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port $TTS_PORT"]
