@@ -104,8 +104,7 @@ Asegurate de que los nombres de archivo coincidan con los definidos en `main.py`
 ```bash
 curl -X POST "http://localhost:8000/tts" \
      -H "Content-Type: application/json" \
-     -d '{ "texto": "Hola, este es un test", "placeholders": ""}' \
-     --output audio.wav
+     -d '{ "texto": "Hola, este es un test", "placeholders": [] }'
 ```
 
 Luego podés reproducirlo:
